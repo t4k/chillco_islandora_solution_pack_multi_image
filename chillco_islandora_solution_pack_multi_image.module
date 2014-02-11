@@ -14,6 +14,24 @@ function chillco_islandora_solution_pack_multi_image_menu() {
     'access arguments' => array(2, array('islandora:chillco_isp_multi_image_container_cmodel')),
     'file' => 'includes/manage_images.inc',
   );
+  $items['islandora/object/%islandora_object/manage/multi_image_container/ingest'] = array(
+      'title' => 'Add Image',
+      'page callback' => 'chillco_islandora_solution_pack_multi_image_ingest_item',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_ACTION,
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(FEDORA_INGEST, 2),
+      'file' => 'includes/manage_images.inc',
+  );
+  $items['islandora/object/%islandora_object/manage/multi_image_container/ingest_zipped'] = array(
+      'title' => 'Add Zipped Images',
+      'page callback' => 'chillco_islandora_solution_pack_multi_image_ingest_zipped_items',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_ACTION,
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(FEDORA_INGEST, 2),
+      'file' => 'includes/manage_images.inc',
+  );
   return $items;
 }
 
