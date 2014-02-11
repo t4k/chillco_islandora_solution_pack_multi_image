@@ -8,12 +8,11 @@ function chillco_islandora_solution_pack_multi_image_menu() {
   $items['islandora/object/%islandora_object/manage/multi_image_container'] = array(
     'title' => 'Image Container',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => 'islandora_paged_content_manage_pages_menu',
+    'page callback' => 'chillco_islandora_solution_pack_multi_image_manage_images_menu',
     'page arguments' => array(2),
     'access callback' => 'islandora_paged_content_manage_pages_access_callback',
     'access arguments' => array(2, array('islandora:chillco_isp_multi_image_container_cmodel')),
-    'file path' => drupal_get_path('module', 'islandora_paged_content'),
-    'file' => 'includes/manage_pages.inc',
+    'file' => 'includes/manage_images.inc',
   );
   return $items;
 }
