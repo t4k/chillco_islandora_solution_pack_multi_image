@@ -5,14 +5,15 @@
  */
 function chillco_islandora_solution_pack_multi_image_menu() {
   $items = array();
-  $items['admin/islandora/chillco_large_image'] = array(
-    'title' => 'Chillco Large Image Collection',
-    'description' => 'Configure the Large Image Solution Pack.',
-    'page callback' => 'drupal_get_form',
-    'access arguments' => array('administer site configuration'),
-    'page arguments' => array('chillco_islandora_solution_pack_large_image_admin'),
-    'file' => 'includes/admin.form.inc',
-    'type' => MENU_NORMAL_ITEM,
+  $items['islandora/object/%islandora_object/manage/multi_image_container'] = array(
+    'title' => 'Image Container',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'islandora_paged_content_manage_pages_menu',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_paged_content_manage_pages_access_callback',
+    'access arguments' => array(2, array('islandora:chillco_isp_multi_image_container_cmodel')),
+    'file path' => drupal_get_path('module', 'islandora_paged_content'),
+    'file' => 'includes/manage_pages.inc',
   );
   return $items;
 }
