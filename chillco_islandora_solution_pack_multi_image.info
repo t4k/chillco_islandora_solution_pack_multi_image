@@ -1,0 +1,9 @@
+name = "Chillco Islandora Multi Image Solution Pack"
+description = "A Large Multi-Image Solution Pack based on the idea of books and pages."
+package = Islandora
+dependencies[] = islandora
+dependencies[] = file
+dependencies[] = chillco_islandora_solution_pack_large_image
+dependencies[] = islandora_paged_content
+version = 7.x-1.0
+core = 7.x

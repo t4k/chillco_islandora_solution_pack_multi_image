@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function chillco_islandora_solution_pack_multi_image_menu() {
+  $items = array();
+  $items['admin/islandora/chillco_large_image'] = array(
+    'title' => 'Chillco Large Image Collection',
+    'description' => 'Configure the Large Image Solution Pack.',
+    'page callback' => 'drupal_get_form',
+    'access arguments' => array('administer site configuration'),
+    'page arguments' => array('chillco_islandora_solution_pack_large_image_admin'),
+    'file' => 'includes/admin.form.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_islandora_required_objects().
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'chillco_islandora_solution_pack_multi_image');
+  // Image Container Content Model.
+  $multi_image_container_content_model = $connection->repository->constructObject('islandora:chillco_isp_multi_image_container_cmodel');
+  $multi_image_container_content_model->owner = 'fedoraAdmin';
+  $multi_image_container_content_model->label = 'Chillco Islandora Multi Image Container Content Model';
+  $multi_image_container_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $multi_image_container_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'text/xml';
+  $datastream->setContentFromFile("$module_path/data/datastreams/chillco_islandora_solution_pack_multi_image_container_ds_composite_model.xml", FALSE);
+  $multi_image_container_content_model->ingestDatastream($datastream);
+
+  // Image Item Content Model.
+  $multi_image_item_content_model = $connection->repository->constructObject('islandora:chillco_isp_multi_image_item_cmodel');
+  $multi_image_item_content_model->owner = 'fedoraAdmin';
+  $multi_image_item_content_model->label = 'Chillco Islandora Multi Image Item Content Model';
+  $multi_image_item_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $multi_image_item_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'text/xml';
+  $datastream->setContentFromFile("$module_path/data/datastreams/chillco_islandora_solution_pack_multi_image_item_ds_composite_model.xml", FALSE);
+  $multi_image_item_content_model->ingestDatastream($datastream);
+
+  return array(
+    'chillco_islandora_solution_pack_multi_image' => array(
+      'title' => 'Chillco Islandora Solution Pack - Multi Image',
+      'objects' => array(
+        $multi_image_container_content_model,
+        $multi_image_item_content_model,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_content_model_forms_form_associations().
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_content_model_forms_form_associations() {
+  return array(
+    'chillco_islandora_solution_pack_multi_image_mods_form' => array(
+      'content_model' => 'islandora:chillco_isp_multi_image_container_cmodel',
+      'form_name' => 'Chillco Large image MODS form',
+      'dsid' => 'MODS',
+      'title_field' => array('titleInfo', 'title'),
+      'transform' => 'mods_to_dc.xsl',
+      'template' => FALSE,
+    ),
+  );
+}
