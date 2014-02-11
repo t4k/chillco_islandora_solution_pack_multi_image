@@ -1,6 +1,6 @@
 name = "Chillco Islandora Multi Image Solution Pack"
 description = "A Large Multi-Image Solution Pack based on the idea of books and pages."
-package = Islandora
+package = Chillco
 dependencies[] = islandora
 dependencies[] = file
 dependencies[] = chillco_islandora_solution_pack_large_image
