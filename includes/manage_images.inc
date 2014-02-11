@@ -44,15 +44,15 @@ function chillco_islandora_solution_pack_multi_image_ingest_item(AbstractObject 
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $tuque = islandora_get_tuque_connection();
-  $page = $tuque->repository->constructObject(islandora_get_namespace($object->id));
-  $page->owner = $user->name;
-  $page->label = 'New Image';
-  $page->models = 'islandora:pageCModel';
+  $image_item = $tuque->repository->constructObject(islandora_get_namespace($object->id));
+  $image_item->owner = $user->name;
+  $image_item->label = 'New Image';
+  $image_item->models = 'islandora:pageCModel';
   drupal_set_title(t('Add image to @container', array('@container' => $object->label)));
   return drupal_get_form('islandora_ingest_form', array(
     'book' => $object,
-    'models' => array('islandora:chillco_isp_multi_image_item_cmodel'),
-    'object' => $page,
+    'models' => array($image_item->models),
+    'object' => $image_item,
     'parent' => $object->id,
   ));
 }
