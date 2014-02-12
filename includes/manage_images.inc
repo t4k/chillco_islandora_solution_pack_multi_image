@@ -105,6 +105,7 @@ function chillco_islandora_solution_pack_multi_image_upload_item_form_submit(arr
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = islandora_ingest_form_get_object($form_state);
   $file = file_load($form_state['values']['file']);
+  $object->label = $file->filename;
   $file_info = pathinfo($object->label);
   $dsid = 'IMAGE';
   if (strtolower($file_info['extension']) == 'tif' || strtolower($file_info['extension']) == 'tiff') {
