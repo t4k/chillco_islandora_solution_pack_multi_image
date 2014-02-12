@@ -50,7 +50,7 @@ function chillco_islandora_solution_pack_multi_image_ingest_item(AbstractObject 
   $image_item->models = 'islandora:chillco_isp_multi_image_item_cmodel';
   drupal_set_title(t('Add image to @container', array('@container' => $object->label)));
   return drupal_get_form('islandora_ingest_form', array(
-    'book' => $object,
+    'multi_image_container' => $object,
     'models' => array('islandora:chillco_isp_multi_image_item_cmodel'),
     'object' => $image_item,
     'parent' => $object->id,
