@@ -112,3 +112,24 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
     ),
   );
 }
+
+/**
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
+ */
+function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_OBJ_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+}
+
+/**
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
+ */
+function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+}
+
+/**
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
+ */
+function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+}
