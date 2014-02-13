@@ -38,66 +38,6 @@ function chillco_islandora_solution_pack_multi_image_manage_images_menu(Abstract
 }
 
 /**
- * Local menu action to present an ingest page form.
- *
- * @param AbstractObject $object
- *   The record container to ingest into.
- *
- * @return string
- *   The HTML representation of the ingest page form.
- */
-function chillco_islandora_solution_pack_multi_image_ingest_item(AbstractObject $object) {
-  global $user;
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'islandora', 'includes/ingest.form');
-  $tuque = islandora_get_tuque_connection();
-  $image_item = $tuque->repository->constructObject(islandora_get_namespace($object->id));
-  $image_item->owner = $user->name;
-  $image_item->label = 'New Image';
-  $image_item->models = 'islandora:chillco_isp_multi_image_item_cmodel';
-  drupal_set_title(t('Add image to @container', array('@container' => $object->label)));
-  return drupal_get_form('islandora_ingest_form', array(
-    'multi_image_container' => $object,
-    'models' => array('islandora:chillco_isp_multi_image_item_cmodel'),
-    'object' => $image_item,
-    'parent' => $object->id,
-  ));
-}
-
-/**
- * The form for uploading a single page image.
- *
- * @param array $form
- *   The Drupal form definition.
- * @param array $form_state
- *   The Drupal form state.
- */
-function chillco_islandora_solution_pack_multi_image_upload_item_form(array $form, array &$form_state, AbstractObject $parent) {
-  $get_default_value = function($name, $default) use(&$form_state) {
-    return isset($form_state['values'][$name]) ? $form_state['values'][$name] : $default;
-  };
-  $form_state['parent'] = $parent;
-  $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $extensions = array('tiff tif jpg jpeg png gif');
-  return array(
-    'file' => array(
-      '#title' => t('Image'),
-      '#type' => 'managed_file',
-      '#description' => t('Select an image to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0])),
-      '#default_value' => $get_default_value('files', NULL),
-      '#upload_location' => 'temporary://',
-      '#required' => TRUE,
-      '#upload_validators' => array(
-        'file_validate_extensions' => $extensions,
-        'file_validate_size' => array($upload_size * 1024 * 1024),
-      ),
-    ),
-  );
-}
-
-/**
  * Upload multiple images to record container.
  */
 function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(array $form, array &$form_state, AbstractObject $record_container) {
@@ -192,6 +132,9 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_
   batch_process();
 }
 
+/**
+ * Sets RELS-EXT/RELS-INT properties and creates the 'OBJ' datastream.
+ */
 function chillco_islandora_solution_pack_multi_image_add_image_items($repository, $config, &$context) {
   module_load_include('inc', 'islandora', 'includes/IslandoraTuque');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
@@ -229,36 +172,4 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_finis
   foreach ($results['tmp_files'] as $file_path) {
     @unlink(drupal_realpath($file_path));
   }
-}
-
-/**
- * Sets RELS-EXT/RELS-INT properties and creates the 'OBJ' datastream.
- *
- * @param array $form
- *   The Drupal form definition.
- * @param array $form_state
- *   The Drupal form state.
- */
-function chillco_islandora_solution_pack_multi_image_upload_item_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $object = islandora_ingest_form_get_object($form_state);
-  $file = file_load($form_state['values']['file']);
-  $object->label = $file->filename;
-  $file_info = pathinfo($object->label);
-  $dsid = 'IMAGE';
-  if (strtolower($file_info['extension']) == 'tif' || strtolower($file_info['extension']) == 'tiff') {
-    $dsid = 'OBJ';
-  }
-  islandora_paged_content_update_datastream($object, drupal_realpath($file->uri), $dsid, NULL, NULL, 'M', FALSE);
-  // Update RELS-EXT properties, page/sequence/etc, and append the page at the
-  // end of the record container.
-  $rels_ext = $object->relationships;
-  $parent = $form_state['parent'];
-  $pages = islandora_paged_content_get_pages($parent);
-  $num_pages = count($pages) + 1;
-  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $parent->id);
-  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $num_pages, TRUE);
-  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $num_pages, TRUE);
-  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
-  islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $parent->id);
 }
