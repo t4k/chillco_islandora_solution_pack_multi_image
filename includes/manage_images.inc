@@ -160,7 +160,7 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_
 
   $files = array();
   foreach ($values['files'] as $temporary_file) {
-    if ($temporay_file['status'] == 'done') {
+    if ($temporary_file['status'] == 'done') {
       $files[$temporary_file['name']] = $temporary_file;
     }
   }
@@ -220,6 +220,9 @@ function chillco_islandora_solution_pack_multi_image_add_image_items($repository
  * Deletes the temporary files associated with the ingested images.
  */
 function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_finished($success, $results, $operations) {
+  if (!isset($rsults['tmp_files'])) {
+    return;
+  }
   foreach ($results['tmp_files'] as $file_path) {
     @unlink(drupal_realpath($file_path));
   }
