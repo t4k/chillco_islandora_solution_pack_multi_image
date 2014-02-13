@@ -193,14 +193,17 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_
 }
 
 function chillco_islandora_solution_pack_multi_image_add_image_items($repository, $config, &$context) {
+  module_load_include('inc', 'islandora', 'includes/IslandoraTuque');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+
   $file_info = pathinfo($config['image']['name']);
+  // Create object.
+  $object = $repository->constructObject($config['namespace']);
+  $object->label = $file_info['filename'];
   $dsid = 'IMAGE';
   if (strtolower($file_info['extension']) == 'tif' || strtolower($file_info['extension']) == 'tiff') {
     $dsid = 'OBJ';
   }
-  // Create object.
-  $object = $repository->constructObject($config['namespace']);
-  $object->label = $file_info['filename'];
   islandora_paged_content_update_datastream($object, drupal_realpath($config['image']['tmppath']), $dsid, NULL, NULL, 'M', FALSE);
   $rels_ext = $object->relationships;
   $parent = $config['record_container_pid'];
