@@ -108,8 +108,8 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(
   $current_images = islandora_paged_content_get_pages($record_container);
   $last_image_sequence_number = count($current_images);
   $form_state['container'] = $record_container;
-  $message = t("This sequence currently has @count images. Additional images will be appended to the end of the sequence by default. You may reorder your images after the process is complete.", array("@count" => $last_image_sequence_number));
 
+  drupal_set_message(t("This sequence currently has @count images. Additional images will be appended to the end of the sequence by default sorted by filename. You may reorder your images after the process is complete.", array("@count" => $last_image_sequence_number)));
   $form['insertion_point'] = array(
     '#type' => 'value',
     '#value' => $last_image_sequence_number,
@@ -146,7 +146,83 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(
 }
 
 function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_submit(array $form, array &$form_state) {
-  dpm($form_state);
+  $tuque = new IslandoraTuque();
+  $repository = $tuque->repository;
+  $values = $form_state['values'];
+  $record_container_pid = $values['record_container_pid'];
+  $namespace = substr($record_container_pid, 0, strpos($record_container_pid, ":"));
+  $record_container = islandora_object_load($record_container_pid);
+  $insertion_point = $values['insertion_point'];
+  if (!$book_object) {
+    drupal_set_message(t("This container does not exist in this repository"), 'warning');
+    return;
+  }
+
+  $files = array();
+  foreach ($values['files'] as $temporary_file) {
+    if ($temporay_file['status'] == 'done') {
+      $files[$temporary_file['name']] = $temporary_file;
+    }
+  }
+  ksort($files);
+
+  $status_message = t('Adding @count image(s) to container.', array('@count' => count($files)));
+  $batch = array(
+    'title' => $status_message,
+    'progress_message' => t('Completed @current operations out of @total.'),
+    'operations' => array(),
+    'file' => drupal_get_path('module', 'chillco_islandora_solution_pack_multi_image') . '/includes/manage_images.inc',
+    'finished' => 'chillco_islandora_solution_pack_multi_image_ingest_multiple_items_finished',
+  );
+
+  $config = array(
+    'record_container_pid' => $record_container_pid,
+    'namespace' => $namespace,
+  );
+  foreach ($files as $file) {
+    $config['sequence_number'] = ++$insertion_point;
+    $config['image'] = $file;
+    $batch['operations'][] = array(
+      'chillco_islandora_solution_pack_multi_image_add_image_items',
+      array($repository, $config),
+    );
+  }
+
+  batch_set($batch);
+  batch_process();
+}
+
+function chillco_islandora_solution_pack_multi_image_add_image_items($repository, $config, &$context) {
+  $file_info = pathinfo($config['image']['name']);
+  $dsid = 'IMAGE';
+  if (strtolower($file_info['extension']) == 'tif' || strtolower($file_info['extension']) == 'tiff') {
+    $dsid = 'OBJ';
+  }
+  // Create object.
+  $object = $repository->constructObject($config['namespace']);
+  $object->label = $file_info['filename'];
+  islandora_paged_content_update_datastream($object, drupal_realpath($config['image']['tmppath']), $dsid, NULL, NULL, 'M', FALSE);
+  $rels_ext = $object->relationships;
+  $parent = $config['record_container_pid'];
+  $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:chillco_isp_multi_image_item_cmodel');
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $parent);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $config['sequence_number'], TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $config['sequence_number'], TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
+  islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $parent);
+  islandora_add_object($object);
+  $context['results']['tmp_files'][] = $config['image']['tmppath'];
+}
+
+/**
+ * Batch 'finished' callback.
+ *
+ * Deletes the temporary files associated with the ingested pages.
+ */
+function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_finished($success, $results, $operations) {
+  foreach ($results['tmp_files'] as $file_path) {
+    @unlink(drupal_realpath($file_path));
+  }
 }
 
 /**
