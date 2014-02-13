@@ -23,9 +23,9 @@ function chillco_islandora_solution_pack_multi_image_menu() {
       'access arguments' => array(FEDORA_INGEST, 2),
       'file' => 'includes/manage_images.inc',
   );
-  $items['islandora/object/%islandora_object/manage/multi_image_container/ingest_zipped'] = array(
-      'title' => 'Add Zipped Images',
-      'page callback' => 'chillco_islandora_solution_pack_multi_image_ingest_zipped_items',
+  $items['islandora/object/%islandora_object/manage/multi_image_container/ingest_multi'] = array(
+      'title' => 'Add Multiple Images',
+      'page callback' => 'chillco_islandora_solution_pack_multi_image_ingest_multiple_items',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
