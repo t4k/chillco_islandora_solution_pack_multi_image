@@ -88,14 +88,28 @@ function chillco_islandora_solution_pack_multi_image_islandora_content_model_for
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
 function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_OBJ_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+
   chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+  $parent_pid = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
+  $parent = islandora_object_load($parent_pid);
+  if ($parent) {
+    chillco_islandora_solution_pack_large_image_update_container_asset($parent);
+  }
 }
 
 /**
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
 function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+
   chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+  $parent_pid = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
+  $parent = islandora_object_load($parent_pid);
+  if ($parent) {
+    chillco_islandora_solution_pack_large_image_update_container_asset($parent);
+  }
 }
 
 /**
@@ -103,4 +117,43 @@ function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi
  */
 function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+}
+
+/**
+ * Updates the given paged content's thumbnail from the first page in the paged
+ * content.
+ *
+ * @param AbstractObject $object
+ *   The paged content object to update.
+ *
+ * @return bool
+ *   TRUE on success, FALSE otherwise.
+ */
+function chillco_islandora_solution_pack_large_image_update_container_asset(AbstractObject $object) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+
+  static $current_pid;
+  if (!islandora_paged_content_can_update_paged_content_thumbnail($object)) {
+    return FALSE;
+  }
+  $images = islandora_paged_content_get_pages($object);
+  $image = array_shift($images);
+  if ($current_pid !== $image['pid']) {
+    $current_pid = $image['pid'];
+    $image = islandora_object_load($current_pid);
+    $mime_detector = new MimeDetect();
+    $dsid = 'IMAGE';
+    if (!empty($image['OBJ'])) {
+      $dsid = 'OBJ';
+    }
+    $ext = $mime_detector->getExtension($dsid->mimeType);
+    $file = drupal_realpath('temporary://{$page->id}_{dsid}.{$ext}');
+    $page[$dsid]->getContent($file);
+    $ret = islandora_paged_content_update_datastream($object,
+      $file,
+      $dsid,
+      "DS FROM {$image->label}");
+    file_unmanaged_delete($file);
+    return $ret;
+  }
 }
