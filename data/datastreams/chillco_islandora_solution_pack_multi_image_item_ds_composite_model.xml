@@ -33,7 +33,7 @@
     <form MIME="image/png"></form>
     <form MIME="image/gif"></form>
   </dsTypeModel>
-  <dsTypeModel ID="OBJ">
+  <dsTypeModel ID="OBJ" ORDERED="false" optional="true">
     <form MIME="image/tiff"/>
   </dsTypeModel>
   <dsTypeModel ID="TECHMD">
