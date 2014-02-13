@@ -126,7 +126,7 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(
     '#title' => t('Compressed images file.'),
     '#type' => 'plupload',
     '#required' => TRUE,
-    '#description' => t('Select file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0])),
+    '#description' => t('Select file(s) for upload.<br/>'),
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_validators' => array(
       'file_validate_extensions' => $extensions,
