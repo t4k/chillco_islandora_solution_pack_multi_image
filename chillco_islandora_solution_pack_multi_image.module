@@ -138,7 +138,7 @@ function chillco_islandora_solution_pack_large_image_update_container_asset(Abst
     $dsid = 'IMAGE';
     $ext = $mime_detector->getExtension($dsid->mimeType);
     $file = drupal_realpath('temporary://{$page->id}_{dsid}.{$ext}');
-    $page[$dsid]->getContent($file);
+    $image[$dsid]->getContent($file);
     $ret = islandora_paged_content_update_datastream($object,
       $file,
       $dsid,
