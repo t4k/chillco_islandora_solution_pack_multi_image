@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @file
+ * Handles the upload of a single page.
+ */
+
+/**
+ * Sequence of forms for handling reordering, deletion, or other batch
+ * processes of images within collection.
+ */
 function chillco_islandora_solution_pack_multi_image_manage_images_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   module_load_include('inc', 'islandora_paged_content', 'includes/manage_pages');
@@ -32,7 +41,7 @@ function chillco_islandora_solution_pack_multi_image_manage_images_menu(Abstract
  * Local menu action to present an ingest page form.
  *
  * @param AbstractObject $object
- *   The book to ingest into.
+ *   The record container to ingest into.
  *
  * @return string
  *   The HTML representation of the ingest page form.
@@ -56,11 +65,6 @@ function chillco_islandora_solution_pack_multi_image_ingest_item(AbstractObject 
     'parent' => $object->id,
   ));
 }
-
-/**
- * @file
- * Handles the upload of a single page.
- */
 
 /**
  * The form for uploading a single page image.
@@ -93,6 +97,9 @@ function chillco_islandora_solution_pack_multi_image_upload_item_form(array $for
   );
 }
 
+/**
+ * Upload multiple images to record container.
+ */
 function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(array $form, array &$form_state, AbstractObject $record_container) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   module_load_include('inc', 'islandora', 'includes/utilities');
@@ -105,7 +112,7 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(
 
   $form['insertion_point'] = array(
     '#type' => 'value',
-    '#value' => $last_page_number,
+    '#value' => $last_image_sequence_number,
   );
 
   // Value behaves more consistently when passed as a string.
@@ -162,7 +169,7 @@ function chillco_islandora_solution_pack_multi_image_upload_item_form_submit(arr
   }
   islandora_paged_content_update_datastream($object, drupal_realpath($file->uri), $dsid, NULL, NULL, 'M', FALSE);
   // Update RELS-EXT properties, page/sequence/etc, and append the page at the
-  // end of the book.
+  // end of the record container.
   $rels_ext = $object->relationships;
   $parent = $form_state['parent'];
   $pages = islandora_paged_content_get_pages($parent);
