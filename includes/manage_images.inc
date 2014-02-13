@@ -93,6 +93,55 @@ function chillco_islandora_solution_pack_multi_image_upload_item_form(array $for
   );
 }
 
+function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form(array $form, array &$form_state, AbstractObject $record_container) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  drupal_set_breadcrumb(islandora_get_breadcrumbs($record_container));
+  $current_images = islandora_paged_content_get_pages($record_container);
+  $last_image_sequence_number = count($current_images);
+  $form_state['container'] = $record_container;
+  $message = t("This sequence currently has @count images. Additional images will be appended to the end of the sequence by default. You may reorder your images after the process is complete.", array("@count" => $last_image_sequence_number));
+
+  $form['insertion_point'] = array(
+    '#type' => 'value',
+    '#value' => $last_page_number,
+  );
+
+  // Value behaves more consistently when passed as a string.
+  $form['current_images'] = array(
+    '#type' => 'hidden',
+    '#value' => serialize($current_images),
+  );
+
+  $extensions = array('tiff tif jpg jpeg png gif');
+  $form['files'] = array(
+    '#title' => t('Compressed images file.'),
+    '#type' => 'plupload',
+    '#required' => TRUE,
+    '#description' => t('Select file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0])),
+    '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
+    '#upload_validators' => array(
+      'file_validate_extensions' => $extensions,
+    ),
+  );
+
+  $form['record_container_pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $record_container->id,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add images'),
+  );
+  return $form;
+
+}
+
+function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_submit(array $form, array &$form_state) {
+  dpm($form_state);
+}
+
 /**
  * Sets RELS-EXT/RELS-INT properties and creates the 'OBJ' datastream.
  *
