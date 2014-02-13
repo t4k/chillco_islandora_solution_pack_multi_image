@@ -153,7 +153,7 @@ function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form_
   $namespace = substr($record_container_pid, 0, strpos($record_container_pid, ":"));
   $record_container = islandora_object_load($record_container_pid);
   $insertion_point = $values['insertion_point'];
-  if (!$book_object) {
+  if (!$record_container) {
     drupal_set_message(t("This container does not exist in this repository"), 'warning');
     return;
   }
@@ -217,7 +217,7 @@ function chillco_islandora_solution_pack_multi_image_add_image_items($repository
 /**
  * Batch 'finished' callback.
  *
- * Deletes the temporary files associated with the ingested pages.
+ * Deletes the temporary files associated with the ingested images.
  */
 function chillco_islandora_solution_pack_multi_image_ingest_multiple_items_finished($success, $results, $operations) {
   foreach ($results['tmp_files'] as $file_path) {
