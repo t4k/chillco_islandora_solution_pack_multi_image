@@ -129,7 +129,8 @@ function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
 function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
-  chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
+  module_load_include('inc', 'chillco_islandora_solution_pack_large_image', 'includes/derivatives');
+  chillco_islandora_solution_pack_large_image_create_all_derivatives($object, TRUE);
 }
 
 /**
@@ -156,13 +157,13 @@ function chillco_islandora_solution_pack_large_image_update_container_asset(Abst
     $image = islandora_object_load($current_pid);
     $mime_detector = new MimeDetect();
     $dsid = 'IMAGE';
-    $ext = $mime_detector->getExtension($dsid->mimeType);
-    $file = drupal_realpath("temporary://{$image->id}_{dsid}.{$ext}");
+    $ext = $mime_detector->getExtension($image[$dsid]->mimeType);
+    $file = drupal_realpath("temporary://{$image->id}_{$dsid}.{$ext}");
     $image[$dsid]->getContent($file);
     $ret = islandora_paged_content_update_datastream($object,
       $file,
       $dsid,
-      "IMAGE FROM {$image->label}", $dsid->mimeType);
+      "IMAGE FROM {$image->label}");
     file_unmanaged_delete($file);
     return $ret;
   }
