@@ -163,7 +163,8 @@ function chillco_islandora_solution_pack_large_image_update_container_asset(Abst
     $ret = islandora_paged_content_update_datastream($object,
       $file,
       $dsid,
-      "IMAGE FROM {$image->label}");
+      $image->label);
+    chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested($object, $object['IMAGE']);
     file_unmanaged_delete($file);
     return $ret;
   }
