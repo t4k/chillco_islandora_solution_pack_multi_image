@@ -162,7 +162,7 @@ function chillco_islandora_solution_pack_large_image_update_container_asset(Abst
     $ret = islandora_paged_content_update_datastream($object,
       $file,
       $dsid,
-      "IMAGE FROM {$image->label}");
+      "IMAGE FROM {$image->label}", $dsid->mimeType);
     file_unmanaged_delete($file);
     return $ret;
   }
