@@ -33,7 +33,7 @@ function chillco_islandora_solution_pack_multi_image_form_alter(&$form, &$form_s
   if ($form_id == 'islandora_paged_content_manage_pages_sequences_form' || $form_id == 'islandora_paged_content_manage_pages_delete_form') {
     $object = $form_state['object'];
     if (in_array('islandora:chillco_isp_multi_image_container_cmodel', $object->models)) {
-      $form['#submit'][] = 'chillco_islandora_solution_pack_large_image_paged_batch_submit';
+      $form['#submit'][] = 'chillco_islandora_solution_pack_multi_image_paged_batch_submit';
     }
   }
   if ($form_id == 'islandora_delete_object_form') {
@@ -72,9 +72,9 @@ function chillco_islandora_solution_pack_multi_image_islandora_delete_object_for
 /**
  * Update the paged content thumbnail provided from a form.
  */
-function chillco_islandora_solution_pack_large_image_paged_batch_submit($form, &$form_state) {
+function chillco_islandora_solution_pack_multi_image_paged_batch_submit($form, &$form_state) {
   $object = $form_state['object'];
-  chillco_islandora_solution_pack_large_image_update_container_asset($object);
+  chillco_islandora_solution_pack_multi_image_update_container_asset($object);
 }
 
 /**
@@ -138,28 +138,35 @@ function chillco_islandora_solution_pack_multi_image_islandora_content_model_for
 /**
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
-function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_OBJ_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_OBJ_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
 }
 
 /**
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
-function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
   chillco_islandora_solution_pack_large_image_islandora_chillco_isp_large_image_cmodel_islandora_object_ingested($object);
   $parent_pid = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
   $parent = islandora_object_load($parent_pid);
   if ($parent) {
-    chillco_islandora_solution_pack_large_image_update_container_asset($parent);
+    chillco_islandora_solution_pack_multi_image_update_container_asset($parent);
   }
+}
+
+/**
+ * Implements hook_CMODEL_PID_DSID_islandora_object_ingested().
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_islandora_object_ingested(AbstractObject $object) {
+  chillco_islandora_solution_pack_multi_image_update_container_asset($object);
 }
 
 /**
  * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
-function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   module_load_include('inc', 'chillco_islandora_solution_pack_large_image', 'includes/derivatives');
   chillco_islandora_solution_pack_large_image_create_all_derivatives($object, TRUE);
 }
@@ -174,7 +181,7 @@ function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi
  * @return bool
  *   TRUE on success, FALSE otherwise.
  */
-function chillco_islandora_solution_pack_large_image_update_container_asset(AbstractObject $object) {
+function chillco_islandora_solution_pack_multi_image_update_container_asset(AbstractObject $object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
   static $current_pid;
@@ -195,7 +202,7 @@ function chillco_islandora_solution_pack_large_image_update_container_asset(Abst
       $file,
       $dsid,
       $image->label);
-    chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested($object, $object['IMAGE']);
+    chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_IMAGE_islandora_datastream_ingested($object, $object['IMAGE']);
     file_unmanaged_delete($file);
     return $ret;
   }
