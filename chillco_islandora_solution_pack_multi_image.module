@@ -39,7 +39,7 @@ function chillco_islandora_solution_pack_multi_image_form_alter(&$form, &$form_s
   if ($form_id == 'islandora_delete_object_form') {
     $object = $form_state['object'];
     if (in_array('islandora:chillco_isp_multi_image_container_cmodel', $object->models)) {
-      $form['description']['#markup'] = t('This will remove the book object and all related page objects. This action cannot be undone.');
+      $form['description']['#markup'] = t('This will remove the image container object and all related image item objects. This action cannot be undone.');
       $form['#submit'] = array('chillco_islandora_solution_pack_multi_image_islandora_delete_object_form_delete_image_container_submit');
     }
   }
