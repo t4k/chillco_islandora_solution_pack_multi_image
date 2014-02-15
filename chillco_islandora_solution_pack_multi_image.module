@@ -32,10 +32,41 @@ function chillco_islandora_solution_pack_multi_image_menu() {
 function chillco_islandora_solution_pack_multi_image_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'islandora_paged_content_manage_pages_sequences_form' || $form_id == 'islandora_paged_content_manage_pages_delete_form') {
     $object = $form_state['object'];
-    if ($object->models[0] == 'islandora:chillco_isp_multi_image_container_cmodel') {
+    if (in_array('islandora:chillco_isp_multi_image_container_cmodel', $object->models)) {
       $form['#submit'][] = 'chillco_islandora_solution_pack_large_image_paged_batch_submit';
     }
   }
+  if ($form_id == 'islandora_delete_object_form') {
+    $object = $form_state['object'];
+    if (in_array('islandora:chillco_isp_multi_image_container_cmodel', $object->models)) {
+      $form['description']['#markup'] = t('This will remove the book object and all related page objects. This action cannot be undone.');
+      $form['#submit'] = array('chillco_islandora_solution_pack_multi_image_islandora_delete_object_form_delete_image_container_submit');
+    }
+  }
+}
+
+/**
+ * Delete all the page objects related to the book object being deleted.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_delete_object_form_delete_image_container_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $object = $form_state['object'];
+  $get_pid = function($o) {
+    return $o['pid'];
+  };
+  $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
+  batch_set(islandora_paged_content_delete_pages_batch($object, $pages));
+  // Called from within this submit handler rather than from the Drupal Form API
+  // as we need the object to exist to generate the pages and if we run this.
+  // batch operation from a submit handler any submit handlers to be called
+  // afterwards will not get called, which is a bug/feature of the Form API.
+  islandora_delete_object_form_submit($form, $form_state);
 }
 
 /**
