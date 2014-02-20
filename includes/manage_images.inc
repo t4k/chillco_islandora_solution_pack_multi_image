@@ -19,7 +19,7 @@ function chillco_islandora_solution_pack_multi_image_manage_images_menu(Abstract
       '#type' => 'vertical_tabs',
       'sequence' => array(
         '#access' => user_access(FEDORA_METADATA_EDIT),
-        '#title' => t('Reorder Pages'),
+        '#title' => t('Reorder Images'),
         '#type' => 'fieldset',
         'form' => drupal_get_form('islandora_paged_content_manage_pages_sequences_form', $object),
         '#collapsible' => TRUE,
@@ -27,7 +27,7 @@ function chillco_islandora_solution_pack_multi_image_manage_images_menu(Abstract
       ),
       'delete' => array(
         '#access' => user_access(FEDORA_PURGE),
-        '#title' => t('Delete Pages'),
+        '#title' => t('Delete Images'),
         '#type' => 'fieldset',
         'form' => drupal_get_form('islandora_paged_content_manage_pages_delete_form', $object),
         '#collapsible' => TRUE,
