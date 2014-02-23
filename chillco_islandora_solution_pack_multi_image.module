@@ -125,10 +125,11 @@ function chillco_islandora_solution_pack_multi_image_islandora_required_objects(
 function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_islandora_view_object($object, $page_number, $page_size) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $images = islandora_paged_content_get_pages($object);
-  if ($image = array_pop($images)) {
+  if ($image = reset($images)) {
+    $object->children = $images;
     $image_object = islandora_object_load($image['pid']);
-    $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $image));
-    return array('' => $output);
+    $image_object->parent = $object;
+    return chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($image_object, $page_number, $page_size);
   }
 }
 
@@ -137,13 +138,32 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   // Get parent container.
-  foreach ($object->relationships->get() as $relationship) {
-    if ($relationship['predicate']['value'] == 'isMemberOf') {
-      // Do something.
+  if (!isset($object->parent)) {
+    foreach ($object->relationships->get() as $relationship) {
+      if ($relationship['predicate']['value'] == 'isMemberOf') {
+        // Do something.
+        $object->parent = islandora_object_load($relationship['object']['value']);
+        $object->parent->children = islandora_paged_content_get_pages($object->parent);
+      }
     }
   }
+  $items = array();
+  foreach ($object->parent->children as $key => $child) {
+    $attributes = array();
+    $classes = "";
+    if ($key == $object->id) {
+      $attributes['class'] = array('active');
+      $classes = "active";
+    }
+    $image = '<img src="' . url("islandora/object/{$key}/datastream/TN/view") . '">';
+    $image = l($image, "islandora/object/{$key}", array('attributes' => $attributes, 'html' => TRUE));
+    $label = l($child['label'], "islandora/object/{$key}", array('attributes' => $attributes));
+    $items[$key] = "<div class='$classes'>{$image} {$label}</div>";
+  }
   $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
+  $output .= theme('item_list', array('items' => $items));
   return array('' => $output);
 }
 
