@@ -3,12 +3,12 @@
 ## Introduction
 
 A test implementation of containers holding images which consists of the following datastreams:
-MODS (on the multi container object ONLY)
-OBJ (mimetype image/tiff)
-IMAGE (mimetype image/jpg,image/png,image/gif)
-LARGE (mimetype image/jpg,image/png,image/gif)
-MEDIUM (mimetype image/jpg,image/png,image/gif)
-TN (mimetype image/jpg,image/png,image/gif)
+* MODS (on the multi container object ONLY)
+* OBJ (mimetype image/tiff)
+* IMAGE (mimetype image/jpg,image/png,image/gif)
+* LARGE (mimetype image/jpg,image/png,image/gif)
+* MEDIUM (mimetype image/jpg,image/png,image/gif)
+* TN (mimetype image/jpg,image/png,image/gif)
 
 It is based off the idea of the book solution pack in that the container holds the MODS record and some information about the first sequenced image. The other images are a part of the container that are related together via RELS-ext. You can use plupload to attach multiple images to an image container quickly.
 
