@@ -123,6 +123,13 @@ function chillco_islandora_solution_pack_multi_image_islandora_required_objects(
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function chillco_islandora_solution_pack_large_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  foreach ($object->relationships->get() as $relationship) {
+    if ($relationship['predicate']['value'] == 'isMemberOf') {
+      $parent_object = islandora_object_load($relationship['object']['value']);
+      $object['MODS'] = $parent_object['MODS'];
+      $object['DC'] = $parent_object['DC'];
+    }
+  }
   $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
   return array('' => $output);
 }
