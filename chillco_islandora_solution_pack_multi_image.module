@@ -154,13 +154,13 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
   foreach ($object->parent->children as $key => $child) {
     $attributes = array();
     $classes = "";
-    if (empty($prev) && empty($current)) {
-      $prev = '<div class="pager-previous">' . l(t("Prev"), "islandora/object/{$key}") . '</div>';
-    }
-    elseif ($key == $object->id) {
+    if ($key == $object->id) {
       $attributes['class'] = array('active');
       $classes = "active";
       $current = $key;
+    }
+    elseif (empty($prev) && empty($current)) {
+      $prev = '<div class="pager-previous">' . l(t("Prev"), "islandora/object/{$key}") . '</div>';
     }
     elseif (!empty($current) && empty($next)) {
       $next = '<div class="pager-next">' . l(t("Next"), "islandora/object/{$key}") . '</div>';
