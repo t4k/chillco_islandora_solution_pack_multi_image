@@ -150,19 +150,31 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
     }
   }
   $items = array();
+  $prev = $current = $next = '';
   foreach ($object->parent->children as $key => $child) {
     $attributes = array();
     $classes = "";
-    if ($key == $object->id) {
+    if (empty($prev) && empty($current)) {
+      $prev = '<div class="pager-previous">' . l(t("Prev"), "islandora/object/{$key}") . '</div>';
+    }
+    elseif ($key == $object->id) {
       $attributes['class'] = array('active');
       $classes = "active";
+      $current = $key;
+    }
+    elseif (!empty($current) && empty($next)) {
+      $next = '<div class="pager-next">' . l(t("Next"), "islandora/object/{$key}") . '</div>';
     }
     $image = '<img src="' . url("islandora/object/{$key}/datastream/TN/view") . '">';
     $image = l($image, "islandora/object/{$key}", array('attributes' => $attributes, 'html' => TRUE));
     $label = l($child['label'], "islandora/object/{$key}", array('attributes' => $attributes));
     $items[$key] = "<div class='$classes'>{$image} {$label}</div>";
   }
-  $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
+  $output = '';
+  if (!empty($prev) || !empty($next)) {
+    $output .= '<div class="pager">' . $prev . $next . '</div>';
+  }
+  $output .= theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
   $output .= theme('item_list', array('items' => $items));
   return array('' => $output);
 }
