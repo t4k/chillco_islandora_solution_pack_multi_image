@@ -123,6 +123,7 @@ function chillco_islandora_solution_pack_multi_image_islandora_required_objects(
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $images = islandora_paged_content_get_pages($object);
   if ($image = array_pop($images)) {
     $image_object = islandora_object_load($image['pid']);
