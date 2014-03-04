@@ -124,9 +124,11 @@ function chillco_islandora_solution_pack_multi_image_islandora_required_objects(
  */
 function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_islandora_view_object($object, $page_number, $page_size) {
   $images = islandora_paged_content_get_pages($object);
-  dpm($images);
-  $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
-  return array('' => $output);
+  if ($image = array_pop($images)) {
+    $image_object = islandora_object_load($image['pid']);
+    $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $image));
+    return array('' => $output);
+  }
 }
 
 
@@ -134,6 +136,12 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  // Get parent container.
+  foreach ($object->relationships->get() as $relationship) {
+    if ($relationship['predicate']['value'] == 'isMemberOf') {
+      // Do something.
+    }
+  }
   $output = theme('chillco_islandora_solution_pack_large_image', array('islandora_object' => $object));
   return array('' => $output);
 }
