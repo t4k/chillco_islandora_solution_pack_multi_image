@@ -46,6 +46,99 @@ function chillco_islandora_solution_pack_multi_image_form_alter(&$form, &$form_s
 }
 
 /**
+ * Implements hook_theme().
+ *
+ * We supply a pattern so we can overide templates at the theme level if needed.
+ * we can append a pid to a template and the new template file will be called
+ * (the pids colon should be replaced with a dash).
+ */
+function chillco_islandora_solution_pack_multi_image_theme($existing, $type, $theme, $path) {
+  return array(
+    'chillco_isp_multi_image_item' => array(
+      'template' => 'theme/chillco-isp-multi-image-item',
+      // We can add pids to the end of this pattern in our preprocess function
+      // and templates will be able to have have a pid appended to the template
+      // name to overide a template on a per object basis. An example template
+      // would be named islandora-basic-image--islandora-27.tpl.phps.
+      'pattern' => 'chillco_islandora_solution_pack_large_image__',
+      'variables' => array('islandora_object' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_multi_image_item(&$variables) {
+  drupal_add_js('misc/form.js');
+  drupal_add_js('misc/collapse.js');
+  $islandora_object = $variables['islandora_object'];
+  $parent = $islandora_object->parent;
+  $repository = $islandora_object->repository;
+  module_load_include('inc', 'islandora', 'includes/datastream');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  // Get DC metadata.
+  if (isset($parent['DC']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $parent['DC'])) {
+    try {
+      $dc = $parent['DC']->content;
+      $dc_object = DublinCore::importFromXMLString($dc);
+    }
+    catch (Exception $e) {
+      drupal_set_message(t('Error retrieving object %s %t', array('%s' => $islandora_object->id, '%t' => $e->getMessage())), 'error', FALSE);
+    }
+  }
+  $variables['islandora_dublin_core'] = isset($dc_object) ? $dc_object : NULL;
+  $variables['dc_array'] = isset($dc_object) ? $dc_object->asArray() : array();
+  $variables['islandora_object_label'] = $islandora_object->label;
+  $variables['theme_hook_suggestions'][] = 'chillco_islandora_solution_pack_large_image__' . str_replace(':', '_', $islandora_object->id);
+  $variables['parent_collections'] = islandora_get_parents_from_rels_ext($islandora_object);
+  // Thumbnail.
+  if (isset($islandora_object['TN']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['TN'])) {
+    $params = array(
+      'title' => $islandora_object->label,
+      'path' => url("islandora/object/{$islandora_object->id}/datastream/TN/view"),
+    );
+    $variables['islandora_thumbnail_img'] = theme('image', $params);
+  }
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+
+  $params = array();
+
+  if (isset($islandora_object['IMAGE']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
+    // Get token to allow access to XACML protected datastreams.
+    // Always use token authentication in case there is a global policy.
+    module_load_include('inc', 'islandora', 'includes/authtokens');
+    $token = islandora_get_object_token($islandora_object->id, 'IMAGE', 2);
+    $jp2_url = url("islandora/object/{$islandora_object->id}/datastream/IMAGE/view",
+      array(
+        'absolute' => TRUE,
+        'query' => array('token' => $token),
+      ));
+    // Prep large image for display with openseadragon or jquery zoom viewer.
+    $params['jp2_url'] = $jp2_url;
+    $params['title'] = $islandora_object->label;
+    $params['path'] = url("islandora/object/{$islandora_object->id}/datastream/IMAGE/view");
+  }
+
+  $viewer = islandora_get_viewer($params, 'chillco_islandora_solution_pack_large_image_viewers', $islandora_object);
+  $variables['islandora_content'] = '';
+  if ($viewer) {
+    $variables['islandora_content'] = $viewer;
+  }
+  // If no viewer is configured just show the jpeg.
+  elseif (isset($islandora_object['IMAGE']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
+    $params = array(
+      'title' => $islandora_object->label,
+      'path' => url("islandora/object/{$islandora_object->id}/datastream/IMAGE/view"),
+    );
+    $variables['islandora_content'] = theme('image', $params);
+  }
+  else {
+    $variables['islandora_content'] = NULL;
+  }
+}
+
+/**
  * Delete all the page objects related to the book object being deleted.
  *
  * @param array $form
@@ -118,6 +211,67 @@ function chillco_islandora_solution_pack_multi_image_islandora_required_objects(
     ),
   );
 }
+
+/**
+ * Implements hook_CMODEL_PID_islandora_view_object().
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_container_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $images = islandora_paged_content_get_pages($object);
+  if ($image = reset($images)) {
+    $object->children = $images;
+    $image_object = islandora_object_load($image['pid']);
+    $image_object->parent = $object;
+    return chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($image_object, $page_number, $page_size);
+  }
+}
+
+
+/**
+ * Implements hook_CMODEL_PID_islandora_view_object().
+ */
+function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($object, $page_number, $page_size) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  // Get parent container.
+  if (!isset($object->parent)) {
+    foreach ($object->relationships->get() as $relationship) {
+      if ($relationship['predicate']['value'] == 'isMemberOf') {
+        // Do something.
+        $object->parent = islandora_object_load($relationship['object']['value']);
+        $object->parent->children = islandora_paged_content_get_pages($object->parent);
+      }
+    }
+  }
+  $items = array();
+  $prev = $current = $next = '';
+  foreach ($object->parent->children as $key => $child) {
+    $attributes = array();
+    $classes = "";
+    if ($key == $object->id) {
+      $attributes['class'] = array('active');
+      $classes = "active";
+      $current = $key;
+    }
+    elseif (empty($prev) && empty($current)) {
+      $prev = '<div class="pager-previous">' . l(t("Prev"), "islandora/object/{$key}") . '</div>';
+    }
+    elseif (!empty($current) && empty($next)) {
+      $next = '<div class="pager-next">' . l(t("Next"), "islandora/object/{$key}") . '</div>';
+    }
+    $image = '<img src="' . url("islandora/object/{$key}/datastream/TN/view") . '">';
+    $image = l($image, "islandora/object/{$key}", array('attributes' => $attributes, 'html' => TRUE));
+    $label = l($child['label'], "islandora/object/{$key}", array('attributes' => $attributes));
+    $items[$key] = "<div class='$classes'>{$image} {$label}</div>";
+  }
+  $output = '';
+  if (!empty($prev) || !empty($next)) {
+    $output .= '<div class="pager">' . $prev . $next . '</div>';
+  }
+  $output .= theme('chillco_isp_multi_image_item', array('islandora_object' => $object));
+  $output .= theme('item_list', array('items' => $items));
+  return array('' => $output);
+}
+
 
 /**
  * Implements hook_islandora_content_model_forms_form_associations().
