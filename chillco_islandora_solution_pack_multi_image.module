@@ -87,6 +87,12 @@ function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_mult
       drupal_set_message(t('Error retrieving object %s %t', array('%s' => $islandora_object->id, '%t' => $e->getMessage())), 'error', FALSE);
     }
   }
+
+  // Get MODS metadata.
+  if (module_exists('islandora_mods_display')) {
+    $variables['islandora_mods'] = theme('islandora_mods_display_display', array('islandora_object' => $islandora_object, 'print' => FALSE));
+  }
+
   $variables['islandora_dublin_core'] = isset($dc_object) ? $dc_object : NULL;
   $variables['dc_array'] = isset($dc_object) ? $dc_object->asArray() : array();
   $variables['islandora_object_label'] = $islandora_object->label;
@@ -225,7 +231,6 @@ function chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi
     return chillco_islandora_solution_pack_multi_image_islandora_chillco_isp_multi_image_item_cmodel_islandora_view_object($image_object, $page_number, $page_size);
   }
 }
-
 
 /**
  * Implements hook_CMODEL_PID_islandora_view_object().

@@ -49,7 +49,7 @@
     <?php endif; ?>
   </div>
   </div>
-  <fieldset class="collapsible collapsed chillco-isp-multi-image-item-metadata">
+  <fieldset class="collapsible chillco-isp-multi-image-item-metadata">
   <legend><span class="fieldset-legend"><?php print t('Details'); ?></span></legend>
     <div class="fieldset-wrapper">
       <dl class="islandora-inline-metadata chillco-isp-multi-image-item-fields">
@@ -67,5 +67,4 @@
     </div>
   </fieldset>
 </div>
-
 
