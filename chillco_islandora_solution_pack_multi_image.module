@@ -31,7 +31,7 @@ function chillco_islandora_solution_pack_multi_image_menu() {
  */
 function chillco_islandora_solution_pack_multi_image_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'islandora_paged_content_manage_pages_sequences_form' || $form_id == 'islandora_paged_content_manage_pages_delete_form') {
-    $object = $form_state['object'];
+    $object = $form_state['build_info']['args'][0];
     if (in_array('islandora:chillco_isp_multi_image_container_cmodel', $object->models)) {
       $form['#submit'][] = 'chillco_islandora_solution_pack_multi_image_paged_batch_submit';
     }
