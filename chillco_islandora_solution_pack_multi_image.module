@@ -20,7 +20,7 @@ function chillco_islandora_solution_pack_multi_image_menu() {
       'page arguments' => array('chillco_islandora_solution_pack_multi_image_ingest_multiple_items_form', 2),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
-      'access arguments' => array(FEDORA_INGEST, 2),
+      'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/manage_images.inc',
   );
   return $items;
@@ -78,7 +78,7 @@ function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_mult
   module_load_include('inc', 'islandora', 'includes/datastream');
   module_load_include('inc', 'islandora', 'includes/utilities');
   // Get DC metadata.
-  if (isset($parent['DC']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $parent['DC'])) {
+  if (isset($parent['DC']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $parent['DC'])) {
     try {
       $dc = $parent['DC']->content;
       $dc_object = DublinCore::importFromXMLString($dc);
@@ -99,7 +99,7 @@ function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_mult
   $variables['theme_hook_suggestions'][] = 'chillco_islandora_solution_pack_large_image__' . str_replace(':', '_', $islandora_object->id);
   $variables['parent_collections'] = islandora_get_parents_from_rels_ext($islandora_object);
   // Thumbnail.
-  if (isset($islandora_object['TN']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['TN'])) {
+  if (isset($islandora_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $islandora_object['TN'])) {
     $params = array(
       'title' => $islandora_object->label,
       'path' => url("islandora/object/{$islandora_object->id}/datastream/TN/view"),
@@ -110,7 +110,7 @@ function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_mult
 
   $params = array();
 
-  if (isset($islandora_object['IMAGE']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
+  if (isset($islandora_object['IMAGE']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
     // Get token to allow access to XACML protected datastreams.
     // Always use token authentication in case there is a global policy.
     module_load_include('inc', 'islandora', 'includes/authtokens');
@@ -132,7 +132,7 @@ function chillco_islandora_solution_pack_multi_image_preprocess_chillco_isp_mult
     $variables['islandora_content'] = $viewer;
   }
   // If no viewer is configured just show the jpeg.
-  elseif (isset($islandora_object['IMAGE']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
+  elseif (isset($islandora_object['IMAGE']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $islandora_object['IMAGE'])) {
     $params = array(
       'title' => $islandora_object->label,
       'path' => url("islandora/object/{$islandora_object->id}/datastream/IMAGE/view"),
